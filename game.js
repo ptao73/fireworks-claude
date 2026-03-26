@@ -16,6 +16,7 @@
   // ===== 音频系统 =====
   let audioCtx = null;
   let soundEnabled = true;
+  let bgmEnabled = true;
   let bgmPlaying = false;
   let bgmNodes = [];  // 存储背景音乐的所有节点用于停止
   let bgmGain = null; // 背景音乐总音量控制
@@ -69,14 +70,15 @@
   ];
 
   const BEAT_MS = 180; // 每拍毫秒（约BPM 167，欢快节奏）
+  const BGM_TARGET_GAIN = 0.15;
 
   function startBGM() {
-    if (!audioCtx || bgmPlaying) return;
+    if (!audioCtx || !bgmEnabled || bgmPlaying) return;
     bgmPlaying = true;
 
     bgmGain = audioCtx.createGain();
     bgmGain.gain.setValueAtTime(0, audioCtx.currentTime);
-    bgmGain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 1.5);
+    bgmGain.gain.linearRampToValueAtTime(BGM_TARGET_GAIN, audioCtx.currentTime + 1.5);
     bgmGain.connect(audioCtx.destination);
 
     const allMelodies = [MELODY_A, MELODY_B, MELODY_C];
@@ -308,9 +310,20 @@
   const levelInfo = document.getElementById('level-info');
   const timerEl = document.getElementById('timer');
   const scoreDisplay = document.getElementById('score-display');
+  const soundButton = document.getElementById('btn-sound');
+  const bgmButton = document.getElementById('btn-bgm');
   const resultTitle = document.getElementById('result-title');
   const resultDetails = document.getElementById('result-details');
   const resultButtons = document.getElementById('result-buttons');
+
+  function updateAudioButtons() {
+    soundButton.textContent = soundEnabled ? '音效 开' : '音效 关';
+    bgmButton.textContent = bgmEnabled ? 'BGM 开' : 'BGM 关';
+    soundButton.classList.toggle('is-off', !soundEnabled);
+    bgmButton.classList.toggle('is-off', !bgmEnabled);
+    soundButton.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+    bgmButton.setAttribute('aria-pressed', bgmEnabled ? 'true' : 'false');
+  }
 
   // ===== 管道开口方向 =====
   const BASE_OPENINGS = {
@@ -430,7 +443,7 @@
     connectedPaths = {};
     prevConnectedCount = 0;
     // 确保BGM在游戏中持续播放
-    if (!bgmPlaying && audioCtx) startBGM();
+    if (bgmEnabled && !bgmPlaying && audioCtx) startBGM();
 
     grid = [];
     for (let r = 0; r < ROWS; r++) {
@@ -1059,7 +1072,7 @@
   // ===== 事件绑定 =====
   document.getElementById('btn-start').addEventListener('click', () => {
     initAudio();
-    startBGM();
+    if (bgmEnabled) startBGM();
     loadLevel(0);
   });
 
@@ -1080,18 +1093,27 @@
     showScreen(startScreen);
   });
 
-  document.getElementById('btn-sound').addEventListener('click', () => {
+  soundButton.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
-    document.getElementById('btn-sound').textContent = soundEnabled ? '🔊' : '🔇';
-    // 静音/恢复背景音乐
-    if (bgmGain && audioCtx) {
-      bgmGain.gain.linearRampToValueAtTime(soundEnabled ? 0.12 : 0, audioCtx.currentTime + 0.3);
+    updateAudioButtons();
+  });
+
+  bgmButton.addEventListener('click', () => {
+    if (!audioCtx) initAudio();
+    bgmEnabled = !bgmEnabled;
+    if (bgmEnabled) {
+      startBGM();
+    } else {
+      stopBGM();
     }
+    updateAudioButtons();
   });
 
   document.getElementById('game-area').addEventListener('touchmove', (e) => {
     e.preventDefault();
   }, { passive: false });
+
+  updateAudioButtons();
 
   window.addEventListener('resize', () => {
     if (gameScreen.classList.contains('active') && grid.length > 0) {

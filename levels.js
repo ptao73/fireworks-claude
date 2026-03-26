@@ -50,6 +50,27 @@ function _tileForDirs(entryDir, exitDir) {
   return ['corner', rot !== undefined ? rot : 0];
 }
 
+function _ensureCrossTile(grid, preferredIndices) {
+  const hasBridge = grid.some(cell => cell && cell[0] === 'bridge');
+  const hasCross = grid.some(cell => cell && cell[0] === 'cross');
+  if (!hasBridge || hasCross) return;
+
+  for (const idx of preferredIndices) {
+    if (grid[idx] && grid[idx][0] !== 'bridge') {
+      grid[idx] = ['cross', 0];
+      return;
+    }
+  }
+
+  for (const type of ['tee', 'straight', 'corner']) {
+    const idx = grid.findIndex(cell => cell && cell[0] === type);
+    if (idx !== -1) {
+      grid[idx] = ['cross', 0];
+      return;
+    }
+  }
+}
+
 /**
  * 生成有解关卡
  * 每条路径至少4次转弯（U型迂回），保证每个火箭可达
@@ -238,11 +259,16 @@ function generateSolvableLevel(id, rows, timeLimit) {
   // 填充空白格子（随机4种普通方块）
   const types = ['straight', 'corner', 'tee', 'cross'];
   const rots = [0, 90, 180, 270];
+  const randomFillIndices = [];
   for (let i = 0; i < grid.length; i++) {
     if (grid[i] === null) {
+      randomFillIndices.push(i);
       grid[i] = [types[Math.floor(Math.random() * types.length)], rots[Math.floor(Math.random() * 4)]];
     }
   }
+
+  // bridge 引入后，仍然保证关卡里保留至少一个 cross，避免第五种方块把 cross 完全挤掉。
+  _ensureCrossTile(grid, randomFillIndices);
 
   // 打乱旋转角度（bridge和cross不打乱，分支连接的tee也保留正确朝向但有概率打乱）
   for (let i = 0; i < grid.length; i++) {

@@ -137,8 +137,9 @@ html, body {
 
 #top-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 10px;
   padding: 10px 16px;
   background: linear-gradient(90deg, var(--accent), #b02820);
   border-bottom: 2px solid var(--lantern-gold);
@@ -155,12 +156,28 @@ html, body {
   text-shadow: 0 0 6px rgba(200, 150, 12, 0.5);
 }
 
-#btn-sound {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
+#top-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.top-toggle {
+  border: 1px solid rgba(255, 240, 224, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.top-toggle.is-off {
+  background: rgba(74, 32, 24, 0.24);
+  color: rgba(255, 245, 235, 0.78);
+  border-color: rgba(255, 240, 224, 0.22);
 }
 
 #game-area {
