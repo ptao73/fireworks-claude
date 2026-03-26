@@ -728,6 +728,12 @@
     }
   }
 
+  function getBridgeVisualChannel(cell, rawChannel) {
+    const rotSteps = (cell.rotation / 90) % 2;
+    if (rotSteps === 1) return rawChannel === 'h' ? 'v' : 'h';
+    return rawChannel;
+  }
+
   // ===== 更新格子视觉（含火源颜色）=====
   function updateCellVisuals() {
     const cells = boardEl.querySelectorAll('.cell');
@@ -743,39 +749,32 @@
         const srcIndices = Array.from(cell.connectedSources);
         const primaryColor = srcIndices.length > 0 ? getSourceColor(srcIndices[0]) : '#00e5ff';
 
-        // 设置背景色调
-        if (srcIndices.length === 1) {
-          el.style.background = hexToRgba(primaryColor, 0.12);
-        } else if (srcIndices.length >= 2) {
-          const c1 = hexToRgba(getSourceColor(srcIndices[0]), 0.15);
-          const c2 = hexToRgba(getSourceColor(srcIndices[1]), 0.15);
-          el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-        }
-
-        // 管道线条颜色
         if (cell.type === 'bridge') {
-          // bridge：分别着色两个通道
+          // bridge 只给实际被火源经过的那一臂上色，未经过的方向保持默认颜色。
+          el.style.background = '';
           pipeLines.forEach(line => {
-            const ch = line.dataset.channel;
-            // 基础通道：h=水平线，v=竖直弧线
-            // CSS旋转后：如果旋转了90°或270°，h和v视觉上互换
-            // 但逻辑通道不变，所以颜色对应不变
-            const rotSteps = (cell.rotation / 90) % 2; // 0或1
-            let logicalCh = ch;
-            if (rotSteps === 1) logicalCh = (ch === 'h') ? 'v' : 'h';
+            const visualChannel = getBridgeVisualChannel(cell, line.dataset.channel);
+            const sourceIdx = visualChannel === 'h' ? cell.hSourceIdx : cell.vSourceIdx;
 
-            if (logicalCh === 'h' && cell.hSourceIdx >= 0) {
-              line.style.stroke = getSourceColor(cell.hSourceIdx);
-              line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(getSourceColor(cell.hSourceIdx), 0.5)})`;
-            } else if (logicalCh === 'v' && cell.vSourceIdx >= 0) {
-              line.style.stroke = getSourceColor(cell.vSourceIdx);
-              line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(getSourceColor(cell.vSourceIdx), 0.5)})`;
+            if (sourceIdx >= 0) {
+              const color = getSourceColor(sourceIdx);
+              line.style.stroke = color;
+              line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(color, 0.5)})`;
             } else {
               line.style.stroke = 'var(--pipe-color)';
               line.style.filter = '';
             }
           });
         } else {
+          // cross 和其他普通方块连通后整块同色。
+          if (srcIndices.length === 1) {
+            el.style.background = hexToRgba(primaryColor, 0.12);
+          } else if (srcIndices.length >= 2) {
+            const c1 = hexToRgba(getSourceColor(srcIndices[0]), 0.15);
+            const c2 = hexToRgba(getSourceColor(srcIndices[1]), 0.15);
+            el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+          }
+
           // 普通方块：所有线条用主色
           pipeLines.forEach(line => {
             line.style.stroke = primaryColor;
