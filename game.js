@@ -299,13 +299,11 @@
   let totalScore = 0;
   let connectedPaths = {};
   let prevConnectedCount = 0; // 用于检测新连通
-  let pipeLift = 14;
 
   // ===== DOM 引用 =====
   const startScreen = document.getElementById('start-screen');
   const gameScreen = document.getElementById('game-screen');
   const resultScreen = document.getElementById('result-screen');
-  const gameAreaEl = document.getElementById('game-area');
   const boardEl = document.getElementById('board');
   const sourcesCol = document.getElementById('sources-col');
   const rocketsCol = document.getElementById('rockets-col');
@@ -317,10 +315,6 @@
   const resultTitle = document.getElementById('result-title');
   const resultDetails = document.getElementById('result-details');
   const resultButtons = document.getElementById('result-buttons');
-  const BOARD_REST_X = 17;
-  const BOARD_REST_Y = -6;
-  let boardTiltRaf = 0;
-  let pendingBoardTilt = { x: BOARD_REST_X, y: BOARD_REST_Y, glareX: 50, glareY: 26 };
 
   function updateAudioButtons() {
     soundButton.textContent = soundEnabled ? '音效 开' : '音效 关';
@@ -329,41 +323,6 @@
     bgmButton.classList.toggle('is-off', !bgmEnabled);
     soundButton.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
     bgmButton.setAttribute('aria-pressed', bgmEnabled ? 'true' : 'false');
-  }
-
-  function applyBoardTilt(x, y, glareX, glareY) {
-    boardEl.style.setProperty('--board-rotate-x', `${x}deg`);
-    boardEl.style.setProperty('--board-rotate-y', `${y}deg`);
-    boardEl.style.setProperty('--board-glare-x', `${glareX}%`);
-    boardEl.style.setProperty('--board-glare-y', `${glareY}%`);
-  }
-
-  function queueBoardTilt(x, y, glareX, glareY) {
-    pendingBoardTilt = { x, y, glareX, glareY };
-    if (boardTiltRaf) return;
-    boardTiltRaf = window.requestAnimationFrame(() => {
-      boardTiltRaf = 0;
-      applyBoardTilt(pendingBoardTilt.x, pendingBoardTilt.y, pendingBoardTilt.glareX, pendingBoardTilt.glareY);
-    });
-  }
-
-  function resetBoardTilt() {
-    queueBoardTilt(BOARD_REST_X, BOARD_REST_Y, 50, 26);
-  }
-
-  function handleBoardPointerMove(event) {
-    if (event.pointerType === 'touch') return;
-    const rect = boardEl.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    const nx = ((event.clientX - rect.left) / rect.width) - 0.5;
-    const ny = ((event.clientY - rect.top) / rect.height) - 0.5;
-    const tiltX = Math.max(10, Math.min(24, BOARD_REST_X - ny * 18));
-    const tiltY = Math.max(-14, Math.min(14, nx * 18));
-    const glareX = 50 + nx * 32;
-    const glareY = 26 + ny * 30;
-
-    queueBoardTilt(tiltX, tiltY, glareX, glareY);
   }
 
   // ===== 管道开口方向 =====
@@ -408,11 +367,7 @@
     if (type === 'straight') {
       addPipeLine(svg, ns, edge.top, edge.bottom, 'v');
     } else if (type === 'corner') {
-      const path = document.createElementNS(ns, 'path');
-      path.setAttribute('d', 'M20,0 L20,14 Q20,20 26,20 L40,20');
-      path.classList.add('pipe-line');
-      path.dataset.channel = 'corner';
-      svg.appendChild(path);
+      addPipePath(svg, ns, 'M20,0 L20,14 Q20,20 26,20 L40,20', 'corner');
     } else if (type === 'tee') {
       addPipeLine(svg, ns, edge.top, edge.bottom, 'v');
       addPipeLine(svg, ns, [20, 20], edge.right, 'h');
@@ -420,14 +375,10 @@
       addPipeLine(svg, ns, edge.top, edge.bottom, 'v');
       addPipeLine(svg, ns, edge.left, edge.right, 'h');
     } else if (type === 'bridge') {
-      // 水平线完整穿过
-      addPipeLine(svg, ns, edge.left, edge.right, 'h');
-      // 竖直线拱起（表示跨越不连通）
-      const vPath = document.createElementNS(ns, 'path');
-      vPath.setAttribute('d', 'M20,0 L20,12 C12,12 12,28 20,28 L20,40');
-      vPath.classList.add('pipe-line');
-      vPath.dataset.channel = 'v';
-      svg.appendChild(vPath);
+      // bridge 视觉上做成“断开的横管 + 拱起的竖管”，避免和 cross 混淆。
+      addPipeLine(svg, ns, edge.left, [10, 20], 'h');
+      addPipeLine(svg, ns, [30, 20], edge.right, 'h');
+      addPipePath(svg, ns, 'M20,0 L20,8 C8,8 8,32 20,32 L20,40', 'v');
     }
 
     // 中心圆点
@@ -445,14 +396,31 @@
   }
 
   function addPipeLine(svg, ns, from, to, channel) {
+    addPipeShape(svg, createPipeLineNode(ns, from, to), channel);
+  }
+
+  function addPipePath(svg, ns, d, channel) {
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', d);
+    addPipeShape(svg, path, channel);
+  }
+
+  function addPipeShape(svg, shape, channel) {
+    ['depth', 'core', 'highlight'].forEach((variant) => {
+      const layer = shape.cloneNode();
+      layer.classList.add('pipe-line', `pipe-${variant}`);
+      if (channel) layer.dataset.channel = channel;
+      svg.appendChild(layer);
+    });
+  }
+
+  function createPipeLineNode(ns, from, to) {
     const line = document.createElementNS(ns, 'line');
     line.setAttribute('x1', from[0]);
     line.setAttribute('y1', from[1]);
     line.setAttribute('x2', to[0]);
     line.setAttribute('y2', to[1]);
-    line.classList.add('pipe-line');
-    if (channel) line.dataset.channel = channel;
-    svg.appendChild(line);
+    return line;
   }
 
   // ===== 计算格子尺寸 =====
@@ -461,7 +429,7 @@
     const areaHeight = window.innerHeight - 100 - 60 - 20;
     const cellW = Math.floor((areaWidth - (COLS - 1) * 2 - 4) / COLS);
     const cellH = Math.floor((areaHeight - (ROWS - 1) * 2 - 4) / ROWS);
-    return Math.max(44, Math.min(cellW, cellH, 56));
+    return Math.max(44, Math.min(cellW, cellH, 60));
   }
 
   // ===== 屏幕切换 =====
@@ -569,12 +537,9 @@
   function renderBoard() {
     boardEl.innerHTML = '';
     const cellSize = calcCellSize();
-    pipeLift = Math.max(12, Math.round(cellSize * 0.26));
     document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
-    document.documentElement.style.setProperty('--cell-depth', Math.max(8, Math.round(cellSize * 0.22)) + 'px');
     boardEl.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
     boardEl.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
-    resetBoardTilt();
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -585,7 +550,7 @@
         el.dataset.row = r;
 
         const svg = createPipeSVG(cell.type);
-        svg.style.transform = `translateZ(${pipeLift}px) rotate(${cell.rotation}deg)`;
+        svg.style.transform = `rotate(${cell.rotation}deg)`;
         el.appendChild(svg);
 
         el.addEventListener('click', () => onCellClick(cell, el));
@@ -647,7 +612,7 @@
     const svg = el.querySelector('svg');
 
     // 立即旋转SVG
-    svg.style.transform = `translateZ(${pipeLift}px) rotate(${cell.rotation}deg)`;
+    svg.style.transform = `rotate(${cell.rotation}deg)`;
 
     // 缩放动画
     el.classList.remove('rotating');
@@ -778,6 +743,22 @@
     return rawChannel;
   }
 
+  function setPipeStrokeColor(line, color) {
+    if (line.classList.contains('pipe-depth')) {
+      line.style.stroke = darkenColor(color, 40);
+      line.style.filter = '';
+      return;
+    }
+    if (line.classList.contains('pipe-highlight')) {
+      line.style.stroke = lightenColor(color, 85);
+      line.style.filter = '';
+      return;
+    }
+
+    line.style.stroke = color;
+    line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(color, 0.45)})`;
+  }
+
   // ===== 更新格子视觉（含火源颜色）=====
   function updateCellVisuals() {
     const cells = boardEl.querySelectorAll('.cell');
@@ -802,11 +783,11 @@
 
             if (sourceIdx >= 0) {
               const color = getSourceColor(sourceIdx);
-              line.style.stroke = color;
-              line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(color, 0.5)})`;
+              setPipeStrokeColor(line, color);
             } else {
-              line.style.stroke = 'var(--pipe-color)';
+              line.style.stroke = '';
               line.style.filter = '';
+              line.style.opacity = '';
             }
           });
         } else {
@@ -821,8 +802,7 @@
 
           // 普通方块：所有线条用主色
           pipeLines.forEach(line => {
-            line.style.stroke = primaryColor;
-            line.style.filter = `drop-shadow(0 0 4px ${hexToRgba(primaryColor, 0.5)})`;
+            setPipeStrokeColor(line, primaryColor);
           });
           if (dot) {
             dot.setAttribute('fill', primaryColor);
@@ -834,6 +814,7 @@
         pipeLines.forEach(line => {
           line.style.stroke = '';
           line.style.filter = '';
+          line.style.opacity = '';
         });
         if (dot) dot.setAttribute('fill', 'var(--pipe-color)');
       }
@@ -1072,6 +1053,16 @@
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   }
 
+  function darkenColor(hex, amount) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    r = Math.max(0, r - amount);
+    g = Math.max(0, g - amount);
+    b = Math.max(0, b - amount);
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+
   // ===== 显示结算结果 =====
   function showResult(passed, scoreLines, fireScore, timeBonus, total, thresholdText) {
     resultTitle.textContent = passed ? '过关！' : '未过关';
@@ -1152,16 +1143,11 @@
     updateAudioButtons();
   });
 
-  boardEl.addEventListener('pointermove', handleBoardPointerMove);
-  boardEl.addEventListener('pointerleave', resetBoardTilt);
-  boardEl.addEventListener('pointercancel', resetBoardTilt);
-
-  gameAreaEl.addEventListener('touchmove', (e) => {
+  document.getElementById('game-area').addEventListener('touchmove', (e) => {
     e.preventDefault();
   }, { passive: false });
 
   updateAudioButtons();
-  resetBoardTilt();
 
   window.addEventListener('resize', () => {
     if (gameScreen.classList.contains('active') && grid.length > 0) {
