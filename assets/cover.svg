@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Fireworks Connect cover</title>
+  <desc id="desc">Cover art for the Fireworks Connect puzzle game.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff4e1" />
+      <stop offset="45%" stop-color="#ffe0b0" />
+      <stop offset="100%" stop-color="#ffd18a" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b7241f" />
+      <stop offset="100%" stop-color="#d4492e" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c8960c" />
+      <stop offset="50%" stop-color="#f2cc63" />
+      <stop offset="100%" stop-color="#b88406" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#9b3a22" flood-opacity="0.2" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="120" cy="120" r="120" fill="#d4372c" opacity="0.08" />
+  <circle cx="1090" cy="140" r="160" fill="#c8960c" opacity="0.08" />
+  <circle cx="1010" cy="540" r="180" fill="#d4372c" opacity="0.06" />
+
+  <g opacity="0.85">
+    <g transform="translate(132 92)">
+      <line x1="-36" y1="0" x2="36" y2="0" stroke="#d4372c" stroke-width="8" stroke-linecap="round" />
+      <line x1="0" y1="-36" x2="0" y2="36" stroke="#d4372c" stroke-width="8" stroke-linecap="round" />
+      <line x1="-26" y1="-26" x2="26" y2="26" stroke="#d4372c" stroke-width="6" stroke-linecap="round" />
+      <line x1="-26" y1="26" x2="26" y2="-26" stroke="#d4372c" stroke-width="6" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="10" fill="#f7d67a" />
+    </g>
+    <g transform="translate(1040 116)">
+      <line x1="-42" y1="0" x2="42" y2="0" stroke="#c8960c" stroke-width="8" stroke-linecap="round" />
+      <line x1="0" y1="-42" x2="0" y2="42" stroke="#c8960c" stroke-width="8" stroke-linecap="round" />
+      <line x1="-30" y1="-30" x2="30" y2="30" stroke="#c8960c" stroke-width="6" stroke-linecap="round" />
+      <line x1="-30" y1="30" x2="30" y2="-30" stroke="#c8960c" stroke-width="6" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="10" fill="#fff6da" />
+    </g>
+    <g transform="translate(1070 480)">
+      <line x1="-26" y1="0" x2="26" y2="0" stroke="#d4372c" stroke-width="6" stroke-linecap="round" />
+      <line x1="0" y1="-26" x2="0" y2="26" stroke="#d4372c" stroke-width="6" stroke-linecap="round" />
+      <line x1="-18" y1="-18" x2="18" y2="18" stroke="#d4372c" stroke-width="4" stroke-linecap="round" />
+      <line x1="-18" y1="18" x2="18" y2="-18" stroke="#d4372c" stroke-width="4" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="8" fill="#f7d67a" />
+    </g>
+  </g>
+
+  <g transform="translate(140 90)" filter="url(#shadow)">
+    <rect x="0" y="0" width="430" height="450" rx="32" fill="url(#panel)" />
+    <rect x="18" y="18" width="394" height="414" rx="24" fill="none" stroke="url(#gold)" stroke-width="4" opacity="0.95" />
+    <text x="48" y="120" fill="#fff4da" font-size="72" font-weight="700" font-family="'PingFang SC', 'Noto Serif SC', serif">烟花连通</text>
+    <text x="50" y="174" fill="#f8d67d" font-size="28" font-weight="600" letter-spacing="4" font-family="'Trebuchet MS', sans-serif">FIREWORKS CONNECT</text>
+    <text x="50" y="250" fill="#fff4da" font-size="28" font-family="'PingFang SC', 'Noto Sans SC', sans-serif">旋转管道，连接火源与火箭</text>
+    <text x="50" y="298" fill="#fff4da" font-size="28" font-family="'PingFang SC', 'Noto Sans SC', sans-serif">限时点火，打出节庆高分</text>
+
+    <g transform="translate(52 344)">
+      <rect x="0" y="0" width="280" height="58" rx="29" fill="url(#gold)" />
+      <text x="140" y="38" text-anchor="middle" fill="#7a2118" font-size="28" font-weight="700" font-family="'PingFang SC', 'Noto Sans SC', sans-serif">HTML + CSS + JavaScript</text>
+    </g>
+  </g>
+
+  <g transform="translate(640 92)" filter="url(#shadow)">
+    <rect x="0" y="0" width="420" height="450" rx="30" fill="#f8e2c2" stroke="#c8960c" stroke-width="8" />
+    <g transform="translate(52 52)">
+      <g fill="#ffe9ce" stroke="#d6b48e" stroke-width="3">
+        <rect x="0" y="0" width="52" height="52" rx="9" />
+        <rect x="56" y="0" width="52" height="52" rx="9" />
+        <rect x="112" y="0" width="52" height="52" rx="9" />
+        <rect x="168" y="0" width="52" height="52" rx="9" />
+        <rect x="224" y="0" width="52" height="52" rx="9" />
+        <rect x="280" y="0" width="52" height="52" rx="9" />
+
+        <rect x="0" y="56" width="52" height="52" rx="9" />
+        <rect x="56" y="56" width="52" height="52" rx="9" />
+        <rect x="112" y="56" width="52" height="52" rx="9" />
+        <rect x="168" y="56" width="52" height="52" rx="9" />
+        <rect x="224" y="56" width="52" height="52" rx="9" />
+        <rect x="280" y="56" width="52" height="52" rx="9" />
+
+        <rect x="0" y="112" width="52" height="52" rx="9" />
+        <rect x="56" y="112" width="52" height="52" rx="9" />
+        <rect x="112" y="112" width="52" height="52" rx="9" />
+        <rect x="168" y="112" width="52" height="52" rx="9" />
+        <rect x="224" y="112" width="52" height="52" rx="9" />
+        <rect x="280" y="112" width="52" height="52" rx="9" />
+
+        <rect x="0" y="168" width="52" height="52" rx="9" />
+        <rect x="56" y="168" width="52" height="52" rx="9" />
+        <rect x="112" y="168" width="52" height="52" rx="9" />
+        <rect x="168" y="168" width="52" height="52" rx="9" />
+        <rect x="224" y="168" width="52" height="52" rx="9" />
+        <rect x="280" y="168" width="52" height="52" rx="9" />
+
+        <rect x="0" y="224" width="52" height="52" rx="9" />
+        <rect x="56" y="224" width="52" height="52" rx="9" />
+        <rect x="112" y="224" width="52" height="52" rx="9" />
+        <rect x="168" y="224" width="52" height="52" rx="9" />
+        <rect x="224" y="224" width="52" height="52" rx="9" />
+        <rect x="280" y="224" width="52" height="52" rx="9" />
+
+        <rect x="0" y="280" width="52" height="52" rx="9" />
+        <rect x="56" y="280" width="52" height="52" rx="9" />
+        <rect x="112" y="280" width="52" height="52" rx="9" />
+        <rect x="168" y="280" width="52" height="52" rx="9" />
+        <rect x="224" y="280" width="52" height="52" rx="9" />
+        <rect x="280" y="280" width="52" height="52" rx="9" />
+      </g>
+
+      <g stroke="#d4372c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M26 26 H138 V194 H250 V82 H306" />
+        <path d="M26 138 H82 V250 H194 V306" stroke="#c8960c" />
+        <path d="M26 250 H82 V194 H194 V82 H306" />
+      </g>
+
+      <g fill="#d4372c">
+        <circle cx="-18" cy="26" r="10" />
+        <circle cx="-18" cy="138" r="10" />
+        <circle cx="-18" cy="250" r="10" />
+      </g>
+      <g fill="#c8960c">
+        <rect x="344" y="14" width="22" height="22" rx="6" />
+        <rect x="344" y="70" width="22" height="22" rx="6" />
+        <rect x="344" y="294" width="22" height="22" rx="6" />
+      </g>
+    </g>
+  </g>
+</svg>

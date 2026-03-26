@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="烟花连通是一款节庆风管道连通小游戏，旋转管道连接火源与火箭，在限定时间内点火结算并冲击高分。">
+  <meta name="theme-color" content="#d4372c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>烟花连通 | Fireworks Connect</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=9">
+</head>
+<body>
+  <!-- 开始界面 -->
+  <div id="start-screen" class="screen active">
+    <div class="start-content">
+      <h1 class="game-title">烟花连通</h1>
+      <p class="game-subtitle">Fireworks Connect</p>
+      <button id="btn-start" class="btn btn-primary">开始游戏</button>
+    </div>
+  </div>
+
+  <!-- 游戏界面 -->
+  <div id="game-screen" class="screen">
+    <!-- 顶部信息栏 -->
+    <div id="top-bar">
+      <span id="level-info">第 1 关</span>
+      <span id="timer">60s</span>
+      <span id="score-display">0 分</span>
+      <button id="btn-sound">🔊</button>
+    </div>
+
+    <!-- 游戏区域 -->
+    <div id="game-area">
+      <div id="sources-col" class="side-col"></div>
+      <div id="board"></div>
+      <div id="rockets-col" class="side-col"></div>
+    </div>
+
+    <!-- 底部控制栏 -->
+    <div id="bottom-bar">
+      <button id="btn-restart" class="btn btn-small">重开本关</button>
+      <button id="btn-ignite" class="btn btn-primary btn-small">点火</button>
+      <button id="btn-menu" class="btn btn-small">菜单</button>
+    </div>
+  </div>
+
+  <!-- 结算界面 -->
+  <div id="result-screen" class="screen">
+    <div class="result-content">
+      <h2 id="result-title"></h2>
+      <div id="result-details"></div>
+      <div id="result-buttons"></div>
+    </div>
+  </div>
+
+  <script src="levels.js?v=9"></script>
+  <script src="game.js?v=9"></script>
+</body>
+</html>
