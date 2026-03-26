@@ -299,11 +299,13 @@
   let totalScore = 0;
   let connectedPaths = {};
   let prevConnectedCount = 0; // 用于检测新连通
+  let pipeLift = 14;
 
   // ===== DOM 引用 =====
   const startScreen = document.getElementById('start-screen');
   const gameScreen = document.getElementById('game-screen');
   const resultScreen = document.getElementById('result-screen');
+  const gameAreaEl = document.getElementById('game-area');
   const boardEl = document.getElementById('board');
   const sourcesCol = document.getElementById('sources-col');
   const rocketsCol = document.getElementById('rockets-col');
@@ -315,6 +317,10 @@
   const resultTitle = document.getElementById('result-title');
   const resultDetails = document.getElementById('result-details');
   const resultButtons = document.getElementById('result-buttons');
+  const BOARD_REST_X = 17;
+  const BOARD_REST_Y = -6;
+  let boardTiltRaf = 0;
+  let pendingBoardTilt = { x: BOARD_REST_X, y: BOARD_REST_Y, glareX: 50, glareY: 26 };
 
   function updateAudioButtons() {
     soundButton.textContent = soundEnabled ? '音效 开' : '音效 关';
@@ -323,6 +329,41 @@
     bgmButton.classList.toggle('is-off', !bgmEnabled);
     soundButton.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
     bgmButton.setAttribute('aria-pressed', bgmEnabled ? 'true' : 'false');
+  }
+
+  function applyBoardTilt(x, y, glareX, glareY) {
+    boardEl.style.setProperty('--board-rotate-x', `${x}deg`);
+    boardEl.style.setProperty('--board-rotate-y', `${y}deg`);
+    boardEl.style.setProperty('--board-glare-x', `${glareX}%`);
+    boardEl.style.setProperty('--board-glare-y', `${glareY}%`);
+  }
+
+  function queueBoardTilt(x, y, glareX, glareY) {
+    pendingBoardTilt = { x, y, glareX, glareY };
+    if (boardTiltRaf) return;
+    boardTiltRaf = window.requestAnimationFrame(() => {
+      boardTiltRaf = 0;
+      applyBoardTilt(pendingBoardTilt.x, pendingBoardTilt.y, pendingBoardTilt.glareX, pendingBoardTilt.glareY);
+    });
+  }
+
+  function resetBoardTilt() {
+    queueBoardTilt(BOARD_REST_X, BOARD_REST_Y, 50, 26);
+  }
+
+  function handleBoardPointerMove(event) {
+    if (event.pointerType === 'touch') return;
+    const rect = boardEl.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const nx = ((event.clientX - rect.left) / rect.width) - 0.5;
+    const ny = ((event.clientY - rect.top) / rect.height) - 0.5;
+    const tiltX = Math.max(10, Math.min(24, BOARD_REST_X - ny * 18));
+    const tiltY = Math.max(-14, Math.min(14, nx * 18));
+    const glareX = 50 + nx * 32;
+    const glareY = 26 + ny * 30;
+
+    queueBoardTilt(tiltX, tiltY, glareX, glareY);
   }
 
   // ===== 管道开口方向 =====
@@ -528,9 +569,12 @@
   function renderBoard() {
     boardEl.innerHTML = '';
     const cellSize = calcCellSize();
+    pipeLift = Math.max(12, Math.round(cellSize * 0.26));
     document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
+    document.documentElement.style.setProperty('--cell-depth', Math.max(8, Math.round(cellSize * 0.22)) + 'px');
     boardEl.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
     boardEl.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
+    resetBoardTilt();
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -541,7 +585,7 @@
         el.dataset.row = r;
 
         const svg = createPipeSVG(cell.type);
-        svg.style.transform = `rotate(${cell.rotation}deg)`;
+        svg.style.transform = `translateZ(${pipeLift}px) rotate(${cell.rotation}deg)`;
         el.appendChild(svg);
 
         el.addEventListener('click', () => onCellClick(cell, el));
@@ -603,7 +647,7 @@
     const svg = el.querySelector('svg');
 
     // 立即旋转SVG
-    svg.style.transform = `rotate(${cell.rotation}deg)`;
+    svg.style.transform = `translateZ(${pipeLift}px) rotate(${cell.rotation}deg)`;
 
     // 缩放动画
     el.classList.remove('rotating');
@@ -1108,11 +1152,16 @@
     updateAudioButtons();
   });
 
-  document.getElementById('game-area').addEventListener('touchmove', (e) => {
+  boardEl.addEventListener('pointermove', handleBoardPointerMove);
+  boardEl.addEventListener('pointerleave', resetBoardTilt);
+  boardEl.addEventListener('pointercancel', resetBoardTilt);
+
+  gameAreaEl.addEventListener('touchmove', (e) => {
     e.preventDefault();
   }, { passive: false });
 
   updateAudioButtons();
+  resetBoardTilt();
 
   window.addEventListener('resize', () => {
     if (gameScreen.classList.contains('active') && grid.length > 0) {
